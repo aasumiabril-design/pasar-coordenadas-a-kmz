@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coordenadas a KMZ</title>
+    <title>GeoConversor Universal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -15,7 +15,6 @@
         .preview-balloon { box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
         [contenteditable]:focus { outline: 2px solid #6366f1; background: #f8fafc; }
         
-        /* Ajustes para móviles */
         @media (max-width: 768px) {
             .main-container { padding: 1rem; }
             .sticky-panel { position: relative !important; top: 0 !important; }
@@ -27,34 +26,32 @@
     <nav class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <i data-lucide="map-pin" class="w-5 h-5 md:w-6 md:h-6"></i>
-                <h1 class="text-lg md:text-xl font-bold tracking-tight">Coordenadas a KMZ, latitud y longitud</h1>
+                <i data-lucide="map" class="w-5 h-5 md:w-6 md:h-6"></i>
+                <h1 class="text-lg md:text-xl font-bold tracking-tight">GeoConversor Universal</h1>
             </div>
             <div class="flex flex-col items-end text-[10px] md:text-xs">
                 <span id="rowCount" class="bg-indigo-500 px-2 py-0.5 rounded mb-0.5">0 puntos detectados</span>
-                <span class="opacity-70 italic hidden md:inline">aasumi v2.0</span>
+                <span class="opacity-70 italic hidden md:inline">aasumi v3.2 Bidireccional</span>
             </div>
         </div>
     </nav>
 
     <main class="max-w-7xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 main-container">
         
-        <!-- COLUMNA IZQUIERDA: CONFIGURACIÓN -->
         <div class="lg:col-span-4 space-y-6">
-            <!-- CARGA DE ARCHIVO -->
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
                 <h2 class="flex items-center gap-2 font-semibold mb-4 border-b pb-2 text-sm md:text-base">
-                    <i data-lucide="file-up" class="w-5 h-5 text-indigo-500"></i>
+                    <i data-lucide="folder-input" class="w-5 h-5 text-indigo-500"></i>
                     1. Cargar Datos
                 </h2>
                 <div class="space-y-3">
                     <div class="relative group">
-                        <input type="file" id="excelInput" accept=".xlsx, .xls, .csv" 
+                        <input type="file" id="fileInput" accept=".xlsx, .xls, .csv, .txt, .kmz, .kml" 
                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                         <div class="border-2 border-dashed border-slate-200 group-hover:border-indigo-400 rounded-lg p-4 transition-all text-center bg-slate-50">
                             <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-slate-400 group-hover:text-indigo-500 mb-2"></i>
-                            <p class="text-xs font-medium text-slate-600">Haz clic o arrastra tu archivo</p>
-                            <p class="text-[10px] text-slate-400 mt-1">Soporta: .XLSX, .XLS, .CSV</p>
+                            <p class="text-xs font-bold text-slate-600">Sube Excel, KMZ/KML o TXT</p>
+                            <p class="text-[10px] text-slate-400 mt-1">.XLSX, .CSV, .TXT, .KMZ, .KML</p>
                         </div>
                     </div>
                     <div id="fileInfo" class="hidden text-[10px] bg-green-50 text-green-700 p-2 rounded border border-green-100 items-center gap-2">
@@ -64,65 +61,97 @@
                 </div>
             </div>
 
-            <!-- CONFIGURACIÓN DE MAPEO (Se muestra al cargar) -->
             <div id="mappingPanel" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hidden sticky-panel">
                 <h2 class="flex items-center gap-2 font-semibold mb-4 border-b pb-2 text-indigo-700 text-sm md:text-base">
                     <i data-lucide="settings-2" class="w-5 h-5"></i>
-                    2. Configurar Globo
+                    2. Mapear y Exportar
                 </h2>
-                <div class="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scroll" id="selectorsContainer">
-                    <!-- Dinámico -->
-                </div>
+                <p class="text-[10px] text-slate-400 mb-4 leading-tight">Asocia las columnas para el formato KMZ o exporta la tabla a otro formato directamente.</p>
+                <div class="space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scroll" id="selectorsContainer">
+                    </div>
                 
                 <div class="mt-4 pt-4 border-t space-y-4">
                     <button id="addCustomField" class="w-full flex items-center justify-center gap-2 py-2 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 text-[10px] font-bold transition-colors">
-                        <i data-lucide="plus" class="w-3 h-3"></i> AÑADIR OTRO CAMPO
+                        <i data-lucide="plus" class="w-3 h-3"></i> AÑADIR OTRO CAMPO AL GLOBO
                     </button>
                     
-                    <div class="space-y-2 pt-2 border-t">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Nombre del Archivo Final</label>
-                        <div class="relative">
-                            <input type="text" id="kmzName" placeholder="mi_proyecto" 
-                                   class="block w-full rounded-md border-slate-300 border p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none pr-12">
-                            <span class="absolute right-3 top-2.5 text-slate-400 text-xs font-bold">.kmz</span>
-                        </div>
+                    <div class="pt-2 border-t space-y-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Nombre Final del Archivo</label>
+                        <input type="text" id="exportName" placeholder="mi_proyecto" 
+                               class="block w-full rounded-md border-slate-300 border p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                     </div>
 
-                    <button id="exportBtn" class="w-full py-3.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold shadow-lg shadow-indigo-100 transition-all active:scale-95 flex items-center justify-center gap-2">
-                        <i data-lucide="download" class="w-4 h-4"></i>
-                        EXPORTAR KMZ
-                    </button>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <button id="exportKmzBtn" class="col-span-2 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-bold shadow-lg shadow-indigo-100 transition-all flex items-center justify-center gap-2 text-sm">
+                            <i data-lucide="globe" class="w-4 h-4"></i> KMZ
+                        </button>
+                        <button id="exportExcelBtn" class="col-span-2 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold transition-all flex items-center justify-center gap-2 text-xs">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> EXCEL
+                        </button>
+                        
+                        <div class="col-span-2 bg-slate-50 border border-slate-200 p-2.5 rounded-lg flex items-center justify-between gap-3 shadow-sm mt-1">
+                            <div class="flex flex-col w-full">
+                                <span class="text-[10px] font-bold text-slate-700 uppercase">Exportar TXT / CSV</span>
+                                <span class="text-[9px] text-slate-500 leading-tight">Símbolo que divide las columnas:</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="txtSeparator" value=";" title="Separador de columnas (ej: ; o ,)"
+                                       class="w-10 p-1.5 rounded bg-white border-slate-300 border text-center focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-sm shadow-inner" maxlength="1">
+                                <button id="exportTxtBtn" class="py-2 px-4 bg-slate-700 text-white rounded-md hover:bg-slate-800 font-bold transition-all flex items-center justify-center gap-2 text-xs whitespace-nowrap">
+                                    <i data-lucide="file-text" class="w-4 h-4"></i> TXT
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- COLUMNA DERECHA: VISTA PREVIA Y TABLA -->
         <div class="lg:col-span-8 space-y-6">
-            <!-- VISTA PREVIA DEL GLOBO -->
             <div id="previewCard" class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200 opacity-50 grayscale pointer-events-none transition-all duration-500">
                 <h2 class="flex items-center gap-2 font-semibold mb-6 border-b pb-2 text-sm md:text-base">
                     <i data-lucide="eye" class="w-5 h-5 text-indigo-500"></i>
-                    Vista Previa del Globo (Google Earth)
+                    Vista Previa (Para exportación KMZ)
                 </h2>
                 <div class="flex flex-col items-center py-4">
                     <div id="previewHeader" class="w-full max-w-sm bg-indigo-50 p-3 rounded-t-xl border-x border-t text-center font-bold text-indigo-700 text-sm md:text-base truncate">Esperando archivo...</div>
                     <div class="w-full max-w-sm preview-balloon bg-white rounded-b-xl p-4 md:p-6 min-h-[160px] relative overflow-hidden">
                         <table id="previewTable" class="w-full text-xs md:text-sm">
-                            <tr><td class="text-slate-300 text-center py-8 italic">Sube un Excel para ver la magia</td></tr>
+                            <tr><td class="text-slate-300 text-center py-8 italic">Sube un archivo para ver la magia</td></tr>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- EDITOR DE DATOS -->
             <div id="dataGridPanel" class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200 hidden overflow-hidden">
                 <div class="flex items-center justify-between mb-4 border-b pb-2">
                     <h2 class="flex items-center gap-2 font-semibold text-sm md:text-base">
                         <i data-lucide="table" class="w-5 h-5 text-indigo-500"></i>
-                        Editor de Celdas
+                        Tabla de Datos
                     </h2>
                     <span class="text-[9px] text-slate-400 hidden md:inline uppercase tracking-widest">Editable en tiempo real</span>
                 </div>
+
+                <div class="mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-3 shadow-inner">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="arrow-right-left" class="w-4 h-4 text-indigo-500"></i>
+                        <div class="flex flex-col">
+                            <span class="text-xs font-bold text-slate-700 uppercase">Conversor de Formato</span>
+                            <span class="text-[9px] text-slate-500">Aplica un formato estándar a las coordenadas</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <select id="targetFormat" class="text-xs border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500 p-2 w-full md:w-auto bg-white">
+                            <option value="DD">Grados Decimales (DD)</option>
+                            <option value="DMS">Grados, Minutos, Segundos (DMS)</option>
+                            <option value="DDM">Grados y Minutos Decimales (DDM)</option>
+                        </select>
+                        <button id="convertCoordsBtn" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-2 rounded-lg text-xs font-bold transition-colors whitespace-nowrap border border-indigo-200">
+                            Aplicar
+                        </button>
+                    </div>
+                </div>
+
                 <div class="overflow-x-auto border rounded-lg custom-scroll max-h-[400px]">
                     <table id="dataTable" class="w-full text-left text-[11px] border-collapse min-w-[600px]">
                         <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm">
@@ -131,17 +160,12 @@
                         <tbody id="tableBody"></tbody>
                     </table>
                 </div>
-                <div class="mt-3 text-[10px] text-slate-400 italic md:flex justify-between items-center">
-                    <p>* Haz clic en cualquier celda para corregir errores manualmente.</p>
-                    <p class="mt-1 md:mt-0">Los puntos/comas se detectan automáticamente.</p>
-                </div>
             </div>
         </div>
     </main>
 
-    <!-- MODAL PERSONALIZADO -->
     <div id="customFieldModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[100] p-4">
-        <div class="bg-white p-6 rounded-2xl w-full max-w-xs shadow-2xl scale-in-center">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-xs shadow-2xl">
             <h3 class="font-bold mb-1 text-slate-800">Nuevo Atributo</h3>
             <p class="text-[10px] text-slate-400 mb-4 italic">Ejemplo: Técnico, Piso, Color...</p>
             <input type="text" id="newFieldName" placeholder="Nombre de etiqueta..." 
@@ -156,71 +180,187 @@
     <script>
         lucide.createIcons();
 
-        let currentData = null;
+        let currentData = [];
         let columns = [];
         let mappings = { nombre: 'ENUMERACIÓN', punto: 'NINGUNO', descripcion: 'NINGUNO', latitud: '', longitud: '' };
         let fieldLabels = { nombre: 'Punto', punto: 'ID Punto', descripcion: 'Descripción', latitud: 'Latitud', longitud: 'Longitud' };
 
         function parseCoord(val) {
-            if (!val) return NaN;
-            let s = String(val).trim().replace(/\s/g, '');
-            if (s.includes('.') && s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
-            else s = s.replace(',', '.');
-            s = s.replace(/[^0-9.\-]/g, '');
-            return parseFloat(s);
+            if (!val && val !== 0) return NaN;
+            let str = String(val).trim().toUpperCase();
+            const isSouthOrWest = str.includes('S') || str.includes('W');
+            const hasMinus = str.startsWith('-');
+            str = str.replace(/(\d),(\d)/g, '$1.$2');
+            let parts = str.match(/\d+(\.\d+)?/g);
+            if (!parts) return NaN;
+
+            let dd = 0;
+            if (parts.length >= 3) {
+                dd = parseFloat(parts[0]) + (parseFloat(parts[1]) / 60) + (parseFloat(parts[2]) / 3600);
+            } else if (parts.length === 2) {
+                dd = parseFloat(parts[0]) + (parseFloat(parts[1]) / 60);
+            } else if (parts.length === 1) {
+                dd = parseFloat(parts[0]);
+            }
+            if (isSouthOrWest || hasMinus) dd = -dd;
+            return dd;
         }
 
-        const excelInput = document.getElementById('excelInput');
-        const mappingPanel = document.getElementById('mappingPanel');
-        const selectorsContainer = document.getElementById('selectorsContainer');
-        const previewTable = document.getElementById('previewTable');
-        const previewHeader = document.getElementById('previewHeader');
-        const previewCard = document.getElementById('previewCard');
+        function formatCoord(decimal, isLat, targetFormat) {
+            if (isNaN(decimal)) return "";
+            const dir = isLat ? (decimal >= 0 ? 'N' : 'S') : (decimal >= 0 ? 'E' : 'W');
+            const absDec = Math.abs(decimal);
+            const deg = Math.floor(absDec);
+            
+            if (targetFormat === 'DD') return decimal.toFixed(6);
+            if (targetFormat === 'DDM') {
+                const min = ((absDec - deg) * 60).toFixed(4);
+                return `${deg}° ${min}' ${dir}`;
+            }
+            if (targetFormat === 'DMS') {
+                const minFull = (absDec - deg) * 60;
+                const min = Math.floor(minFull);
+                const sec = ((minFull - min) * 60).toFixed(2);
+                return `${deg}° ${min}' ${sec}" ${dir}`;
+            }
+            return decimal;
+        }
 
-        excelInput.addEventListener('change', (e) => {
+        const fileInput = document.getElementById('fileInput');
+        fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            // UI Feedback
             document.getElementById('fileInfo').classList.remove('hidden');
             document.getElementById('fileInfo').classList.add('flex');
             document.getElementById('fileNameDisplay').innerText = file.name;
+            const ext = file.name.split('.').pop().toLowerCase();
 
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                const wb = XLSX.read(evt.target.result, { type: 'binary', cellNF: true, cellText: true });
-                const ws = wb.Sheets[wb.SheetNames[0]];
-                currentData = XLSX.utils.sheet_to_json(ws, { raw: false });
-                
-                if (currentData.length === 0) {
-                    alert("El archivo parece estar vacío.");
-                    return;
-                }
+            if (ext === 'kmz') {
+                const zip = new JSZip();
+                try {
+                    const zipData = await zip.loadAsync(file);
+                    let kmlContent = "";
+                    for (let filename in zipData.files) {
+                        if (filename.toLowerCase().endsWith('.kml')) {
+                            kmlContent = await zipData.files[filename].async("text");
+                            break;
+                        }
+                    }
+                    if (kmlContent) processKML(kmlContent);
+                    else alert("No se encontró KML válido en el KMZ.");
+                } catch(err) { alert("Error al leer el KMZ."); }
+            } else if (ext === 'kml') {
+                const reader = new FileReader();
+                reader.onload = (evt) => processKML(evt.target.result);
+                reader.readAsText(file);
+            } else if (ext === 'txt' || ext === 'csv') {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const text = evt.target.result;
+                    const lines = text.split(/\r?\n/);
+                    if (lines.length > 0) {
+                        const firstLine = lines[0];
+                        let sep = '\t';
+                        if (firstLine.includes(';')) sep = ';';
+                        else if (firstLine.includes(',')) sep = ',';
+                        else if (firstLine.includes('|')) sep = '|';
 
-                columns = Object.keys(currentData[0]);
-                document.getElementById('rowCount').innerText = `${currentData.length} puntos detectados`;
-                
-                // Intento de auto-mapeo inteligente
-                columns.forEach(col => {
-                    const c = col.toLowerCase();
-                    if (c.includes('lat') && !mappings.latitud) mappings.latitud = col;
-                    if ((c.includes('lon') || c.includes('lng')) && !mappings.longitud) mappings.longitud = col;
-                });
-
-                // Activar visualmente la página
-                previewCard.classList.remove('opacity-50', 'grayscale', 'pointer-events-none');
-                mappingPanel.classList.remove('hidden');
-                document.getElementById('dataGridPanel').classList.remove('hidden');
-
-                renderSelectors();
-                renderTable();
-                updatePreview();
-            };
-            reader.readAsBinaryString(file);
+                        const headers = firstLine.split(sep).map(h => h.trim().replace(/^"|"$/g, ''));
+                        let rawData = [];
+                        
+                        for(let i = 1; i < lines.length; i++) {
+                            if(!lines[i].trim()) continue;
+                            const vals = lines[i].split(sep);
+                            let obj = {};
+                            headers.forEach((h, j) => {
+                                let v = vals[j] ? vals[j].trim().replace(/^"|"$/g, '') : "";
+                                obj[h] = v;
+                            });
+                            rawData.push(obj);
+                        }
+                        initData(rawData);
+                    }
+                };
+                reader.readAsText(file);
+            } else if (ext === 'xlsx' || ext === 'xls') {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const wb = XLSX.read(evt.target.result, { type: 'binary', cellNF: true, cellText: true });
+                    const ws = wb.Sheets[wb.SheetNames[0]];
+                    const rawData = XLSX.utils.sheet_to_json(ws, { raw: false, defval: "" });
+                    initData(rawData);
+                };
+                reader.readAsBinaryString(file);
+            }
         });
 
+        function processKML(xmlString) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(xmlString, "text/xml");
+            const placemarks = doc.querySelectorAll("Placemark");
+            let data = [];
+            
+            placemarks.forEach(p => {
+                let row = {};
+                let name = p.querySelector("name");
+                row["Nombre"] = name ? name.textContent : "";
+                
+                let coords = p.querySelector("Point coordinates");
+                if (coords) {
+                    let parts = coords.textContent.trim().split(",");
+                    row["Longitud"] = parts[0] || "";
+                    row["Latitud"] = parts[1] || "";
+                }
+
+                let desc = p.querySelector("description");
+                if (desc) {
+                    let d = document.createElement("div");
+                    d.innerHTML = desc.textContent;
+                    let rows = d.querySelectorAll("tr");
+                    rows.forEach(tr => {
+                        let tds = tr.querySelectorAll("td");
+                        if (tds.length >= 2) {
+                            let key = tds[0].textContent.trim().replace(/:$/, '');
+                            let val = tds[1].textContent.trim();
+                            if (!["LATITUD", "LONGITUD"].includes(key.toUpperCase())) {
+                                row[key] = val;
+                            }
+                        }
+                    });
+                }
+                data.push(row);
+            });
+            initData(data);
+        }
+
+        function initData(data) {
+            currentData = data;
+            if (!currentData || currentData.length === 0) {
+                alert("El archivo parece estar vacío o no pudo leerse.");
+                return;
+            }
+            columns = Object.keys(currentData[0] || {});
+            document.getElementById('rowCount').innerText = `${currentData.length} puntos detectados`;
+            
+            mappings = { nombre: 'ENUMERACIÓN', punto: 'NINGUNO', descripcion: 'NINGUNO', latitud: '', longitud: '' };
+            columns.forEach(col => {
+                const c = col.toLowerCase();
+                if ((c.includes('lat') || c === 'y') && !mappings.latitud) mappings.latitud = col;
+                if ((c.includes('lon') || c.includes('lng') || c === 'x') && !mappings.longitud) mappings.longitud = col;
+                if (c.includes('nombre') || c.includes('name')) mappings.nombre = col;
+            });
+
+            document.getElementById('previewCard').classList.remove('opacity-50', 'grayscale', 'pointer-events-none');
+            document.getElementById('mappingPanel').classList.remove('hidden');
+            document.getElementById('dataGridPanel').classList.remove('hidden');
+
+            renderSelectors(); renderTable(); updatePreview();
+        }
+
         function renderSelectors() {
-            selectorsContainer.innerHTML = '';
+            const container = document.getElementById('selectorsContainer');
+            container.innerHTML = '';
             createFieldConfig('nombre', 'Cabecera (Título)', true);
             createFieldConfig('punto', 'Dato Secundario', true);
             createFieldConfig('latitud', 'Latitud', false);
@@ -235,158 +375,127 @@
         function createFieldConfig(id, defaultLabel, includeExtras, isRemovable = false) {
             const container = document.createElement('div');
             container.className = "p-3 bg-slate-50 border rounded-xl space-y-2 hover:bg-indigo-50/30 transition-colors";
-
-            const row1 = document.createElement('div');
-            row1.className = "flex justify-between items-center";
-            row1.innerHTML = `<span class="text-[9px] font-bold text-indigo-400 uppercase tracking-wider">${id.includes('custom') ? 'Personalizado' : 'Campo Estándar'}</span>`;
+            
+            const headerRow = document.createElement('div');
+            headerRow.className = "flex justify-between items-center";
+            headerRow.innerHTML = `<span class="text-[9px] font-bold text-indigo-400 uppercase tracking-wider">${id.includes('custom') ? 'Personalizado' : 'Campo KMZ'}</span>`;
             if (isRemovable) {
                 const del = document.createElement('button');
                 del.innerHTML = '<i data-lucide="trash-2" class="w-3 h-3 text-red-400"></i>';
-                del.className = "hover:bg-red-50 p-1 rounded transition-colors";
                 del.onclick = () => { delete mappings[id]; delete fieldLabels[id]; renderSelectors(); updatePreview(); };
-                row1.appendChild(del);
+                headerRow.appendChild(del);
             }
-            container.appendChild(row1);
+            container.appendChild(headerRow);
 
-            const labelInput = document.createElement('input');
-            labelInput.type = "text";
-            labelInput.value = fieldLabels[id] || "";
-            labelInput.placeholder = "Título en el Globo";
-            labelInput.className = "w-full text-xs p-2 border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-400 font-bold bg-white";
-            labelInput.oninput = (e) => { fieldLabels[id] = e.target.value; updatePreview(); };
-
+            const input = document.createElement('input');
+            input.value = fieldLabels[id] || ""; input.className = "w-full text-xs p-2 border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-400 font-bold bg-white";
+            input.oninput = (e) => { fieldLabels[id] = e.target.value; updatePreview(); };
+            
             const select = document.createElement('select');
             select.className = "w-full text-[11px] p-2 border border-slate-200 rounded-lg bg-white cursor-pointer outline-none focus:border-indigo-400";
             const opts = [...columns];
-            if (includeExtras) opts.unshift('ENUMERACIÓN', 'NINGUNO');
-            else opts.unshift('-- Seleccionar Columna --');
-
+            if (includeExtras) opts.unshift('ENUMERACIÓN', 'NINGUNO'); else opts.unshift('-- Seleccionar Columna --');
             opts.forEach(o => {
-                const opt = document.createElement('option');
-                opt.value = o; opt.text = o;
+                const opt = document.createElement('option'); opt.value = o; opt.text = o;
                 if (mappings[id] === o) opt.selected = true;
                 select.appendChild(opt);
             });
             select.onchange = (e) => { mappings[id] = e.target.value; updatePreview(); };
 
-            container.appendChild(labelInput);
-            container.appendChild(select);
-            selectorsContainer.appendChild(container);
+            container.appendChild(input); container.appendChild(select);
+            document.getElementById('selectorsContainer').appendChild(container);
             lucide.createIcons();
         }
 
         function updatePreview() {
             if (!currentData || currentData.length === 0) return;
             const row = currentData[0];
-            
             let title = "";
-            const labelNombre = fieldLabels.nombre || "Punto";
-            if (mappings.nombre === 'ENUMERACIÓN') title = `${labelNombre} 1`;
+            if (mappings.nombre === 'ENUMERACIÓN') title = `${fieldLabels.nombre} 1`;
             else if (mappings.nombre === 'NINGUNO') title = "Sin Título";
             else title = row[mappings.nombre] || "---";
-            previewHeader.innerText = title;
+            document.getElementById('previewHeader').innerText = title;
 
             let html = "";
             const addRow = (id) => {
                 const col = mappings[id];
                 if (!col || col === 'NINGUNO' || col.includes('--')) return;
-                
                 const label = fieldLabels[id] || id;
-                let val = "";
-                if (col === 'ENUMERACIÓN') val = "1";
-                else if (id === 'latitud' || id === 'longitud') {
+                let val = (col === 'ENUMERACIÓN') ? "1" : (row[col] || "-");
+                if (id === 'latitud' || id === 'longitud') {
                     const p = parseCoord(row[col]);
-                    val = isNaN(p) ? `<span class="text-red-500 font-bold">${row[col]}</span>` : p;
-                } else val = row[col] || "-";
-
+                    val = isNaN(p) ? `<span class="text-red-500 font-bold">${row[col]}</span>` : p.toFixed(6);
+                }
                 html += `<tr class="border-b border-slate-50 last:border-0"><td class="py-3 pr-4 font-bold text-slate-400 text-[10px] uppercase align-top">${label}</td><td class="py-3 text-slate-700">${val}</td></tr>`;
             };
 
-            addRow('punto');
-            addRow('latitud');
-            addRow('longitud');
-            addRow('descripcion');
+            addRow('punto'); addRow('latitud'); addRow('longitud'); addRow('descripcion');
             Object.keys(mappings).forEach(k => { if (k.startsWith('custom_')) addRow(k); });
-            
-            previewTable.innerHTML = html || "<tr><td class='text-center py-8 text-slate-300 italic'>No hay campos configurados</td></tr>";
+            document.getElementById('previewTable').innerHTML = html || "<tr><td class='text-center py-8 text-slate-300 italic'>Sin datos</td></tr>";
         }
 
         function renderTable() {
-            if (!currentData) return;
             document.getElementById('tableHeader').innerHTML = `<th class="p-3 border">#</th>` + columns.map(c => `<th class="p-3 border whitespace-nowrap min-w-[120px]">${c}</th>`).join('');
-            document.getElementById('tableBody').innerHTML = '';
+            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
             currentData.forEach((row, idx) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-indigo-50 transition-colors group border-b";
+                const tr = document.createElement('tr'); tr.className = "hover:bg-indigo-50 transition-colors border-b";
                 let tds = `<td class="p-3 border bg-slate-50 font-bold text-center text-slate-400">${idx + 1}</td>`;
-                columns.forEach(c => {
-                    tds += `<td class="p-3 border focus:bg-white transition-all outline-none" contenteditable="true" data-row="${idx}" data-col="${c}">${row[c] || ''}</td>`;
-                });
-                tr.innerHTML = tds;
-                document.getElementById('tableBody').appendChild(tr);
+                columns.forEach(c => { tds += `<td class="p-3 border focus:bg-white outline-none" contenteditable="true" data-row="${idx}" data-col="${c}">${row[c] || ''}</td>`; });
+                tr.innerHTML = tds; tbody.appendChild(tr);
             });
 
-            // Delegación de eventos para edición masiva
-            document.getElementById('tableBody').addEventListener('input', (e) => {
-                const rowIdx = e.target.dataset.row;
-                const colName = e.target.dataset.col;
-                if (rowIdx !== undefined) {
-                    currentData[rowIdx][colName] = e.target.innerText;
-                    if (rowIdx == 0) updatePreview();
-                }
+            tbody.addEventListener('input', (e) => {
+                const r = e.target.dataset.row; const c = e.target.dataset.col;
+                if (r !== undefined) { currentData[r][c] = e.target.innerText; if (r == 0) updatePreview(); }
             });
         }
 
-        const modal = document.getElementById('customFieldModal');
-        const inputNew = document.getElementById('newFieldName');
-        document.getElementById('addCustomField').onclick = () => { modal.classList.remove('hidden'); inputNew.focus(); };
-        function closeModal() { modal.classList.add('hidden'); inputNew.value = ""; }
-        document.getElementById('confirmCustomField').onclick = () => {
-            const name = inputNew.value.trim();
-            if (name) {
-                const id = 'custom_' + Date.now();
-                mappings[id] = 'NINGUNO';
-                fieldLabels[id] = name;
-                renderSelectors();
-                closeModal();
-                updatePreview();
+        document.getElementById('convertCoordsBtn').addEventListener('click', () => {
+            const latCol = mappings.latitud; const lonCol = mappings.longitud;
+            if (!latCol || !lonCol || latCol.includes('--') || lonCol.includes('--')) {
+                alert("Mapea las columnas Latitud y Longitud para usar el conversor."); return;
             }
+            const tgt = document.getElementById('targetFormat').value;
+            currentData.forEach(row => {
+                const latDD = parseCoord(row[latCol]); const lonDD = parseCoord(row[lonCol]);
+                if (!isNaN(latDD)) row[latCol] = formatCoord(latDD, true, tgt);
+                if (!isNaN(lonDD)) row[lonCol] = formatCoord(lonDD, false, tgt);
+            });
+            renderTable(); updatePreview();
+        });
+
+        const modal = document.getElementById('customFieldModal');
+        document.getElementById('addCustomField').onclick = () => { modal.classList.remove('hidden'); document.getElementById('newFieldName').focus(); };
+        function closeModal() { modal.classList.add('hidden'); document.getElementById('newFieldName').value = ""; }
+        document.getElementById('confirmCustomField').onclick = () => {
+            const name = document.getElementById('newFieldName').value.trim();
+            if (name) { const id = 'custom_' + Date.now(); mappings[id] = 'NINGUNO'; fieldLabels[id] = name; renderSelectors(); updatePreview(); closeModal(); }
         };
 
-        document.getElementById('exportBtn').onclick = async () => {
+        // --- EXPORTAR KMZ ---
+        document.getElementById('exportKmzBtn').onclick = async () => {
             if (!currentData || currentData.length === 0) return;
             const latCol = mappings.latitud; const lonCol = mappings.longitud;
-            if (!latCol || !lonCol || latCol.includes('--') || lonCol.includes('--')) { 
-                alert("Debes asignar obligatoriamente las columnas de Latitud y Longitud."); 
-                return; 
-            }
+            if (!latCol || !lonCol || latCol.includes('--') || lonCol.includes('--')) { alert("Asigna columnas Latitud y Longitud"); return; }
 
             const zip = new JSZip();
             let kml = `<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>`;
             
-            let exportCount = 0;
             currentData.forEach((row, i) => {
                 const lat = parseCoord(row[latCol]); const lon = parseCoord(row[lonCol]);
                 if (isNaN(lat) || isNaN(lon)) return;
-                exportCount++;
-
-                let name = "";
-                const labelNom = fieldLabels.nombre || "Punto";
-                if (mappings.nombre === 'ENUMERACIÓN') name = `${labelNom} ${i + 1}`;
-                else if (mappings.nombre === 'NINGUNO') name = "";
-                else name = row[mappings.nombre] || "";
-
+                
+                let name = mappings.nombre === 'ENUMERACIÓN' ? `${fieldLabels.nombre} ${i+1}` : (mappings.nombre === 'NINGUNO' ? "" : row[mappings.nombre] || "");
                 let info = "";
                 const buildRow = (id) => {
-                    const col = mappings[id];
-                    if (!col || col === 'NINGUNO' || col.includes('--')) return;
+                    const col = mappings[id]; if (!col || col === 'NINGUNO' || col.includes('--')) return;
                     let val = (col === 'ENUMERACIÓN') ? (i + 1) : (row[col] || "");
                     info += `<tr><td style="color:#888;padding-right:12px;padding-bottom:5px;"><b>${fieldLabels[id].toUpperCase()}</b></td><td style="padding-bottom:5px;">${val}</td></tr>`;
                 };
 
                 buildRow('punto');
-                info += `<tr><td style="color:#888;padding-right:12px;padding-bottom:5px;"><b>${fieldLabels.latitud.toUpperCase()}</b></td><td style="padding-bottom:5px;">${lat}</td></tr>`;
-                info += `<tr><td style="color:#888;padding-right:12px;padding-bottom:5px;"><b>${fieldLabels.longitud.toUpperCase()}</b></td><td style="padding-bottom:5px;">${lon}</td></tr>`;
+                info += `<tr><td style="color:#888;padding-right:12px;padding-bottom:5px;"><b>${fieldLabels.latitud.toUpperCase()}</b></td><td style="padding-bottom:5px;">${row[latCol]}</td></tr>`;
+                info += `<tr><td style="color:#888;padding-right:12px;padding-bottom:5px;"><b>${fieldLabels.longitud.toUpperCase()}</b></td><td style="padding-bottom:5px;">${row[lonCol]}</td></tr>`;
                 buildRow('descripcion');
                 Object.keys(mappings).forEach(k => { if (k.startsWith('custom_')) buildRow(k); });
 
@@ -396,16 +505,47 @@
             kml += `</Document></kml>`;
             zip.file("doc.kml", kml);
             const blob = await zip.generateAsync({ type: "blob" });
+            downloadFile(blob, (document.getElementById('exportName').value || "datos_exportados") + ".kmz");
+        };
+
+        // --- EXPORTAR EXCEL ---
+        document.getElementById('exportExcelBtn').onclick = () => {
+            if (!currentData || currentData.length === 0) return;
+            const ws = XLSX.utils.json_to_sheet(currentData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Datos");
+            XLSX.writeFile(wb, (document.getElementById('exportName').value || "datos_exportados") + ".xlsx");
+        };
+
+        // --- EXPORTAR TXT / CSV ---
+        document.getElementById('exportTxtBtn').onclick = () => {
+            if (!currentData || currentData.length === 0) return;
+            
+            const sep = document.getElementById('txtSeparator').value || ";";
+            let txt = columns.map(c => c.toUpperCase()).join(sep) + "\n";
+            
+            currentData.forEach(row => { 
+                const rowStr = columns.map(c => {
+                    let val = row[c] !== undefined && row[c] !== null ? String(row[c]) : "";
+                    if(val.includes(sep) || val.includes('\n') || val.includes('"')) {
+                        val = `"${val.replace(/"/g, '""')}"`;
+                    }
+                    return val;
+                }).join(sep);
+                txt += rowStr + "\n"; 
+            });
+
+            const ext = sep === ',' ? ".csv" : ".txt";
+            const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+            downloadFile(blob, (document.getElementById('exportName').value || "datos_exportados") + ext);
+        };
+
+        function downloadFile(blob, filename) {
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            const finalName = document.getElementById('kmzName').value.trim() || "puntos_exportados";
-            link.download = finalName + ".kmz";
+            link.download = filename;
             link.click();
-            
-            if (exportCount < currentData.length) {
-                alert(`Exportado: ${exportCount} de ${currentData.length} puntos. Algunos puntos tenían coordenadas inválidas.`);
-            }
-        };
+        }
     </script>
 </body>
 </html>
