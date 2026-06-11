@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeoConversor de coordenadas</title>
+    <title>GeoConversor Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -27,170 +27,334 @@
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <i data-lucide="map" class="w-5 h-5 md:w-6 md:h-6"></i>
-                <h1 class="text-lg md:text-xl font-bold tracking-tight">GeoConversor de coordenadas</h1>
+                <h1 class="text-lg md:text-xl font-bold tracking-tight">GeoConversor Profesional</h1>
             </div>
             <div class="flex flex-col items-end text-[10px] md:text-xs">
-                <span id="rowCount" class="bg-indigo-500 px-2 py-0.5 rounded mb-0.5">0 puntos detectados</span>
-                <span class="opacity-70 italic hidden md:inline">NIDARA version 3.2 Ing. civil</span>
+                <span id="rowCount" class="bg-indigo-500 px-2 py-0.5 rounded mb-0.5">0 puntos en tabla</span>
+                <span class="opacity-70 italic hidden md:inline">NIDARA version 4.0 Ing. civil</span>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 main-container">
-        
-        <div class="lg:col-span-4 space-y-6">
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="flex items-center gap-2 font-semibold mb-4 border-b pb-2 text-sm md:text-base">
-                    <i data-lucide="folder-input" class="w-5 h-5 text-indigo-500"></i>
-                    1. Cargar Datos
-                </h2>
-                <div class="space-y-3">
-                    <div class="relative group">
-                        <input type="file" id="fileInput" accept=".xlsx, .xls, .csv, .txt, .kmz, .kml" 
-                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                        <div class="border-2 border-dashed border-slate-200 group-hover:border-indigo-400 rounded-lg p-4 transition-all text-center bg-slate-50">
-                            <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-slate-400 group-hover:text-indigo-500 mb-2"></i>
-                            <p class="text-xs font-bold text-slate-600">Sube Excel, KMZ/KML o TXT</p>
-                            <p class="text-[10px] text-slate-400 mt-1">.XLSX, .CSV, .TXT, .KMZ, .KML</p>
-                        </div>
-                    </div>
-                    <div id="fileInfo" class="hidden text-[10px] bg-green-50 text-green-700 p-2 rounded border border-green-100 items-center gap-2">
-                        <i data-lucide="check-circle" class="w-3 h-3"></i>
-                        <span id="fileNameDisplay" class="truncate font-medium"></span>
-                    </div>
-                </div>
-            </div>
+    <div class="bg-white border-b border-slate-200 sticky top-[57px] z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto flex">
+            <button id="tab1Btn" class="px-6 py-3 border-b-2 border-indigo-600 text-indigo-600 font-bold text-xs md:text-sm flex items-center gap-2 transition-all">
+                <i data-lucide="layers" class="w-4 h-4"></i> Procesador de Archivos y KMZ
+            </button>
+            <button id="tab2Btn" class="px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-medium text-xs md:text-sm flex items-center gap-2 transition-all">
+                <i data-lucide="calculator" class="w-4 h-4"></i> Conversor Masivo Rápido
+            </button>
+        </div>
+    </div>
 
-            <div id="mappingPanel" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hidden sticky-panel">
-                <h2 class="flex items-center gap-2 font-semibold mb-4 border-b pb-2 text-indigo-700 text-sm md:text-base">
-                    <i data-lucide="settings-2" class="w-5 h-5"></i>
-                    2. Mapear y Exportar
-                </h2>
-                <p class="text-[10px] text-slate-400 mb-4 leading-tight">Asocia las columnas para el formato KMZ o exporta la tabla a otro formato directamente.</p>
-                <div class="space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scroll" id="selectorsContainer">
-                    </div>
+    <div id="tab1Content" class="transition-all duration-300">
+        <main class="max-w-7xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 main-container">
+            
+            <div class="lg:col-span-4 space-y-6">
                 
-                <div class="mt-4 pt-4 border-t space-y-4">
-                    <button id="addCustomField" class="w-full flex items-center justify-center gap-2 py-2 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 text-[10px] font-bold transition-colors">
-                        <i data-lucide="plus" class="w-3 h-3"></i> AÑADIR OTRO CAMPO AL GLOBO
-                    </button>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="flex items-center gap-2 font-semibold mb-4 border-b pb-2 text-sm md:text-base">
+                        <i data-lucide="folder-input" class="w-5 h-5 text-indigo-500"></i>
+                        1. Cargar Datos
+                    </h2>
                     
-                    <div class="pt-2 border-t space-y-2">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Nombre Final del Archivo</label>
-                        <input type="text" id="exportName" placeholder="mi_proyecto" 
-                               class="block w-full rounded-md border-slate-300 border p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 mt-2">
-                        <button id="exportKmzBtn" class="col-span-2 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-bold shadow-lg shadow-indigo-100 transition-all flex items-center justify-center gap-2 text-sm">
-                            <i data-lucide="globe" class="w-4 h-4"></i> KMZ
-                        </button>
-                        <button id="exportExcelBtn" class="col-span-2 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold transition-all flex items-center justify-center gap-2 text-xs">
-                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> EXCEL
-                        </button>
-                        
-                        <div class="col-span-2 bg-slate-50 border border-slate-200 p-2.5 rounded-lg flex items-center justify-between gap-3 shadow-sm mt-1">
-                            <div class="flex flex-col w-full">
-                                <span class="text-[10px] font-bold text-slate-700 uppercase">Exportar TXT / CSV</span>
-                                <span class="text-[9px] text-slate-500 leading-tight">Símbolo que divide las columnas:</span>
+                    <div class="space-y-4">
+                        <div class="relative group">
+                            <input type="file" id="fileInput" accept=".xlsx, .xls, .csv, .txt, .kmz, .kml" 
+                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            <div class="border-2 border-dashed border-slate-200 group-hover:border-indigo-400 rounded-lg p-4 transition-all text-center bg-slate-50">
+                                <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-slate-400 group-hover:text-indigo-500 mb-2"></i>
+                                <p class="text-xs font-bold text-slate-600">Sube Excel, KMZ/KML o TXT</p>
+                                <p class="text-[10px] text-slate-400 mt-1">.XLSX, .CSV, .TXT, .KMZ, .KML</p>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <input type="text" id="txtSeparator" value=";" title="Separador de columnas (ej: ; o ,)"
-                                       class="w-10 p-1.5 rounded bg-white border-slate-300 border text-center focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-sm shadow-inner" maxlength="1">
-                                <button id="exportTxtBtn" class="py-2 px-4 bg-slate-700 text-white rounded-md hover:bg-slate-800 font-bold transition-all flex items-center justify-center gap-2 text-xs whitespace-nowrap">
-                                    <i data-lucide="file-text" class="w-4 h-4"></i> TXT
+                        </div>
+                        <div id="fileInfo" class="hidden text-[10px] bg-green-50 text-green-700 p-2 rounded border border-green-100 items-center gap-2">
+                            <i data-lucide="check-circle" class="w-3 h-3"></i>
+                            <span id="fileNameDisplay" class="truncate font-medium"></span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <div class="h-px bg-slate-200 flex-1"></div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase">O pegar datos directamente</span>
+                                <button id="clearText1Btn" class="p-1 rounded bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-500 transition-colors border border-transparent hover:border-red-200" title="Borrar contenido del cuadro">
+                                    <i data-lucide="trash-2" class="w-3 h-3"></i>
                                 </button>
                             </div>
+                            <div class="h-px bg-slate-200 flex-1"></div>
+                        </div>
+
+                        <div>
+                            <textarea id="textInput" rows="3" class="w-full text-xs p-2 border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-400 bg-slate-50 custom-scroll" placeholder="Pega filas con títulos desde Excel aquí..."></textarea>
+                            <button id="loadTextBtn" class="mt-2 w-full flex items-center justify-center gap-2 py-2 bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100 border border-indigo-100 text-[10px] font-bold transition-colors">
+                                <i data-lucide="clipboard-paste" class="w-3 h-3"></i> CARGAR EN TABLA PRINCIPAL
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mappingPanel" class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hidden sticky-panel">
+                    <h2 class="flex items-center gap-2 font-semibold mb-4 border-b pb-2 text-indigo-700 text-sm md:text-base">
+                        <i data-lucide="settings-2" class="w-5 h-5"></i>
+                        2. Mapear y Exportar
+                    </h2>
+                    <p class="text-[10px] text-slate-400 mb-4 leading-tight">Asocia las columnas para el formato KMZ o exporta la tabla a otro formato directamente.</p>
+                    <div class="space-y-3 max-h-[35vh] overflow-y-auto pr-2 custom-scroll" id="selectorsContainer"></div>
+                    
+                    <div class="mt-4 pt-4 border-t space-y-4">
+                        <button id="addCustomField" class="w-full flex items-center justify-center gap-2 py-2 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 text-[10px] font-bold transition-colors">
+                            <i data-lucide="plus" class="w-3 h-3"></i> AÑADIR OTRO CAMPO AL GLOBO
+                        </button>
+                        
+                        <div class="pt-2 border-t space-y-2">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Nombre Final del Archivo</label>
+                            <input type="text" id="exportName" placeholder="mi_proyecto" 
+                                   class="block w-full rounded-md border-slate-300 border p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <button id="exportKmzBtn" class="col-span-2 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-bold shadow-lg shadow-indigo-100 transition-all flex items-center justify-center gap-2 text-sm">
+                                <i data-lucide="globe" class="w-4 h-4"></i> EXPORTAR KMZ
+                            </button>
+                            <button id="exportExcelBtn" class="col-span-2 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold transition-all flex items-center justify-center gap-2 text-xs">
+                                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> EXPORTAR EXCEL
+                            </button>
+                            
+                            <div class="col-span-2 bg-slate-50 border border-slate-200 p-2.5 rounded-lg flex items-center justify-between gap-3 shadow-sm mt-1">
+                                <div class="flex flex-col w-full">
+                                    <span class="text-[10px] font-bold text-slate-700 uppercase">Exportar TXT / CSV</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="text" id="txtSeparator" value=";" title="Separador" class="w-8 p-1 rounded bg-white border-slate-300 border text-center font-bold text-xs" maxlength="1">
+                                    <button id="exportTxtBtn" class="py-1.5 px-3 bg-slate-700 text-white rounded font-bold hover:bg-slate-800 text-xs">TXT</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="lg:col-span-8 space-y-6">
-            <div id="previewCard" class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200 opacity-50 grayscale pointer-events-none transition-all duration-500">
-                <h2 class="flex items-center gap-2 font-semibold mb-6 border-b pb-2 text-sm md:text-base">
-                    <i data-lucide="eye" class="w-5 h-5 text-indigo-500"></i>
-                    Vista Previa (Para exportación KMZ)
-                </h2>
-                <div class="flex flex-col items-center py-4">
-                    <div id="previewHeader" class="w-full max-w-sm bg-indigo-50 p-3 rounded-t-xl border-x border-t text-center font-bold text-indigo-700 text-sm md:text-base truncate">Esperando archivo...</div>
-                    <div class="w-full max-w-sm preview-balloon bg-white rounded-b-xl p-4 md:p-6 min-h-[160px] relative overflow-hidden">
-                        <table id="previewTable" class="w-full text-xs md:text-sm">
-                            <tr><td class="text-slate-300 text-center py-8 italic">Sube un archivo para ver la magia</td></tr>
+            <div class="lg:col-span-8 space-y-6">
+                <div id="previewCard" class="bg-white p-4 md:p-5 rounded-xl shadow-sm border border-slate-200 opacity-50 grayscale pointer-events-none transition-all">
+                    <h2 class="flex items-center gap-2 font-semibold mb-4 border-b pb-2 text-sm">
+                        <i data-lucide="eye" class="w-4 h-4 text-indigo-500"></i>Vista Previa del Globo (KMZ)
+                    </h2>
+                    <div class="flex flex-col items-center py-2">
+                        <div id="previewHeader" class="w-full max-w-sm bg-indigo-50 p-2 rounded-t-xl border-x border-t text-center font-bold text-indigo-700 text-xs truncate">Esperando datos...</div>
+                        <div class="w-full max-w-sm preview-balloon bg-white rounded-b-xl p-4 min-h-[120px]">
+                            <table id="previewTable" class="w-full text-xs">
+                                <tr><td class="text-slate-300 text-center py-4 italic">Carga información para previsualizar el primer punto</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dataGridPanel" class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200 hidden overflow-hidden">
+                    <div class="flex items-center justify-between mb-4 border-b pb-2">
+                        <h2 class="flex items-center gap-2 font-semibold text-sm">
+                            <i data-lucide="table" class="w-5 h-5 text-indigo-500"></i>Tabla Base de Datos
+                        </h2>
+                    </div>
+
+                    <div class="mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-3">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="arrow-right-left" class="w-4 h-4 text-indigo-600 bg-indigo-100 p-1 rounded-md"></i>
+                            <span class="text-xs font-bold text-slate-700 uppercase">Estandarizar Coordenadas de Tabla</span>
+                        </div>
+                        <div class="flex items-center gap-2 w-full md:w-auto">
+                            <select id="targetFormat" class="text-xs font-bold border border-slate-300 rounded p-1.5 bg-white">
+                                <option value="DD">A Decimales (DD)</option>
+                                <option value="DMS">A Grados (DMS)</option>
+                                <option value="DDM">A Grados y Mins (DDM)</option>
+                            </select>
+                            <button id="convertCoordsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-xs font-bold">
+                                Aplicar a Columnas Mapeadas
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto border rounded-lg custom-scroll max-h-[380px]">
+                        <table id="dataTable" class="w-full text-left text-[11px] border-collapse min-w-[500px]">
+                            <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm">
+                                <tr id="tableHeader" class="text-slate-600 uppercase"></tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
+        </main>
+    </div>
 
-            <div id="dataGridPanel" class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200 hidden overflow-hidden">
-                <div class="flex items-center justify-between mb-4 border-b pb-2">
-                    <h2 class="flex items-center gap-2 font-semibold text-sm md:text-base">
-                        <i data-lucide="table" class="w-5 h-5 text-indigo-500"></i>
-                        Tabla de Datos
+    <div id="tab2Content" class="hidden transition-all duration-300">
+        <main class="max-w-7xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-5 bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <div>
+                    <h2 class="flex items-center gap-2 font-bold text-slate-800 text-sm md:text-base">
+                        <i data-lucide="binary" class="text-indigo-600 w-5 h-5"></i>
+                        Entrada de Coordenadas Masivas
                     </h2>
-                    <span class="text-[9px] text-slate-400 hidden md:inline uppercase tracking-widest">Editable en tiempo real</span>
+                    <p class="text-[11px] text-slate-400 mt-1 leading-tight">
+                        Carga un archivo o introduce texto. Admite coordenadas sueltas o columnas múltiples (Lat y Lon) procedentes de Excel o blocs de notas.
+                    </p>
                 </div>
 
-                <div class="mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-3 shadow-inner">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="arrow-right-left" class="w-4 h-4 text-indigo-500"></i>
-                        <div class="flex flex-col">
-                            <span class="text-xs font-bold text-slate-700 uppercase">Conversor de Formato</span>
-                            <span class="text-[9px] text-slate-500">Aplica un formato estándar a las coordenadas</span>
-                        </div>
+                <div class="relative group">
+                    <input type="file" id="quickFileInput" accept=".xlsx, .xls, .csv, .txt" 
+                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                    <div class="border-2 border-dashed border-slate-200 group-hover:border-indigo-400 rounded-lg p-3 transition-all text-center bg-slate-50">
+                        <i data-lucide="upload-cloud" class="w-6 h-6 mx-auto text-slate-400 group-hover:text-indigo-500 mb-1"></i>
+                        <p class="text-[11px] font-bold text-slate-600">Sube un archivo rápido (Excel, CSV o TXT)</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5">Automáticamente extraerá las coordenadas</p>
                     </div>
-                    <div class="flex items-center gap-2 w-full md:w-auto">
-                        <select id="targetFormat" class="text-xs border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500 p-2 w-full md:w-auto bg-white">
-                            <option value="DD">Grados Decimales (DD)</option>
-                            <option value="DMS">Grados, Minutos, Segundos (DMS)</option>
-                            <option value="DDM">Grados y Minutos Decimales (DDM)</option>
+                </div>
+                <div id="quickFileInfo" class="hidden text-[10px] bg-green-50 text-green-700 p-2 rounded border border-green-100 items-center gap-2">
+                    <i data-lucide="check-circle" class="w-3 h-3"></i>
+                    <span id="quickFileNameDisplay" class="truncate font-medium"></span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <div class="h-px bg-slate-200 flex-1"></div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">O Pegar / Editar Directamente</span>
+                        <button id="clearText2Btn" class="p-1 rounded bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-500 transition-colors border border-transparent hover:border-red-200" title="Borrar contenido del cuadro">
+                            <i data-lucide="trash-2" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                    <div class="h-px bg-slate-200 flex-1"></div>
+                </div>
+
+                <textarea id="quickListInput" rows="8" class="w-full text-xs font-mono p-3 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 custom-scroll" 
+                          placeholder="Ejemplos de entrada manual:&#10;-74.06364&#10;4° 36' 34.2'' N&#10;4.6097, -74.0817  (Pares separados por comas, espacios o pestañas)"></textarea>
+
+                <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg border">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase">Formato de Salida</label>
+                        <select id="quickTargetFormat" class="text-xs font-bold border border-slate-300 rounded p-2 bg-white outline-none focus:border-indigo-500">
+                            <option value="DMS">Grados DMS (00° 00' 00\")</option>
+                            <option value="DD">Decimales DD (0.000000)</option>
+                            <option value="DDM">Grados y Minutos DDM</option>
                         </select>
-                        <button id="convertCoordsBtn" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-2 rounded-lg text-xs font-bold transition-colors whitespace-nowrap border border-indigo-200">
-                            Aplicar
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase">Asumir Tipo (Si no se indica)</label>
+                        <select id="quickTypeAssumption" class="text-xs font-bold border border-slate-300 rounded p-2 bg-white outline-none focus:border-indigo-500">
+                            <option value="auto">Auto-detectar por rango</option>
+                            <option value="lat">Forzar como Latitud (N/S)</option>
+                            <option value="lon">Forzar como Longitud (E/W)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="quickProcessBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all">
+                    <i data-lucide="play" class="w-4 h-4"></i> PROCESAR Y CONVERTIR LISTA
+                </button>
+            </div>
+
+            <div class="lg:col-span-7 bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 mb-4 gap-2">
+                    <div>
+                        <h2 class="flex items-center gap-2 font-bold text-slate-800 text-sm md:text-base">
+                            <i data-lucide="check-square" class="text-green-600 w-5 h-5"></i>
+                            Resultados Obtenidos
+                        </h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="quickCopyBtn" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar Columna
+                        </button>
+                        <button id="quickExcelBtn" class="px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors">
+                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Guardar Excel
                         </button>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto border rounded-lg custom-scroll max-h-[400px]">
-                    <table id="dataTable" class="w-full text-left text-[11px] border-collapse min-w-[600px]">
-                        <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm">
-                            <tr id="tableHeader" class="text-slate-600 uppercase"></tr>
+                <div class="overflow-x-auto border rounded-xl custom-scroll max-h-[460px] flex-1">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-50 sticky top-0 shadow-sm font-bold text-slate-500 uppercase text-[10px]">
+                            <tr>
+                                <th class="p-3 border w-12 text-center">#</th>
+                                <th class="p-3 border">Dato de Entrada</th>
+                                <th class="p-3 border">Resultado Convertido</th>
+                            </tr>
                         </thead>
-                        <tbody id="tableBody"></tbody>
+                        <tbody id="quickListTableBody" class="font-mono">
+                            <tr>
+                                <td colspan="3" class="text-center py-12 text-slate-400 italic">No hay datos procesados aún. Carga un archivo o inserta coordenadas a la izquierda.</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
-        </div>
-    </main>
+        </main>
+    </div>
 
     <div id="customFieldModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[100] p-4">
         <div class="bg-white p-6 rounded-2xl w-full max-w-xs shadow-2xl">
             <h3 class="font-bold mb-1 text-slate-800">Nuevo Atributo</h3>
-            <p class="text-[10px] text-slate-400 mb-4 italic">Ejemplo: Técnico, Piso, Color...</p>
-            <input type="text" id="newFieldName" placeholder="Nombre de etiqueta..." 
-                   class="w-full border-slate-200 border p-3 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            <p class="text-[10px] text-slate-400 mb-4 italic">Ejemplo: Técnico, Altura, Estado...</p>
+            <input type="text" id="newFieldName" placeholder="Nombre de etiqueta..." class="w-full border-slate-200 border p-3 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
             <div class="flex gap-2">
-                <button onclick="closeModal()" class="flex-1 py-2.5 text-slate-500 text-xs font-bold hover:bg-slate-100 rounded-xl transition-colors">CANCELAR</button>
-                <button id="confirmCustomField" class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-md transition-all">AGREGAR</button>
+                <button onclick="closeModal()" class="flex-1 py-2 text-slate-500 text-xs font-bold hover:bg-slate-100 rounded-xl">CANCELAR</button>
+                <button id="confirmCustomField" class="flex-1 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700">AGREGAR</button>
             </div>
         </div>
     </div>
 
     <script>
+        // Inicializar Iconos Lucide
         lucide.createIcons();
 
+        // Control de Pestañas
+        const tab1Btn = document.getElementById('tab1Btn');
+        const tab2Btn = document.getElementById('tab2Btn');
+        const tab1Content = document.getElementById('tab1Content');
+        const tab2Content = document.getElementById('tab2Content');
+
+        tab1Btn.addEventListener('click', () => {
+            tab1Btn.className = "px-6 py-3 border-b-2 border-indigo-600 text-indigo-600 font-bold text-xs md:text-sm flex items-center gap-2 transition-all";
+            tab2Btn.className = "px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-medium text-xs md:text-sm flex items-center gap-2 transition-all";
+            tab1Content.classList.remove('hidden');
+            tab2Content.classList.add('hidden');
+            lucide.createIcons();
+        });
+
+        tab2Btn.addEventListener('click', () => {
+            tab2Btn.className = "px-6 py-3 border-b-2 border-indigo-600 text-indigo-600 font-bold text-xs md:text-sm flex items-center gap-2 transition-all";
+            tab1Btn.className = "px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-medium text-xs md:text-sm flex items-center gap-2 transition-all";
+            tab2Content.classList.remove('hidden');
+            tab1Content.classList.add('hidden');
+            lucide.createIcons();
+        });
+
+        // --- FUNCIONES DE BOTONES LIMPIAR ---
+        document.getElementById('clearText1Btn').addEventListener('click', () => {
+            const input = document.getElementById('textInput');
+            input.value = '';
+            input.focus();
+        });
+
+        document.getElementById('clearText2Btn').addEventListener('click', () => {
+            const input = document.getElementById('quickListInput');
+            input.value = '';
+            input.focus();
+        });
+
+        // --- SISTEMA CORE DE CONVERSIÓN ---
         let currentData = [];
         let columns = [];
         let mappings = { nombre: 'ENUMERACIÓN', punto: 'NINGUNO', descripcion: 'NINGUNO', latitud: '', longitud: '' };
         let fieldLabels = { nombre: 'Punto', punto: 'ID Punto', descripcion: 'Descripción', latitud: 'Latitud', longitud: 'Longitud' };
+        let quickListData = []; // Datos de la pestaña conversor masivo
 
+        // Extractor universal de Coordenadas (Soporta Decimal, DMS y variaciones)
         function parseCoord(val) {
             if (!val && val !== 0) return NaN;
             let str = String(val).trim().toUpperCase();
-            const isSouthOrWest = str.includes('S') || str.includes('W');
+            const isSouthOrWest = str.includes('S') || str.includes('W') || str.includes('O');
             const hasMinus = str.startsWith('-');
-            str = str.replace(/(\d),(\d)/g, '$1.$2');
+            str = str.replace(/(\d),(\d)/g, '$1.$2'); // Corregir comas decimales regionales
             let parts = str.match(/\d+(\.\d+)?/g);
             if (!parts) return NaN;
 
@@ -206,8 +370,9 @@
             return dd;
         }
 
+        // Formateador bidireccional
         function formatCoord(decimal, isLat, targetFormat) {
-            if (isNaN(decimal)) return "";
+            if (isNaN(decimal)) return "Inválido";
             const dir = isLat ? (decimal >= 0 ? 'N' : 'S') : (decimal >= 0 ? 'E' : 'W');
             const absDec = Math.abs(decimal);
             const deg = Math.floor(absDec);
@@ -226,13 +391,197 @@
             return decimal;
         }
 
-        const fileInput = document.getElementById('fileInput');
-        fileInput.addEventListener('change', async (e) => {
+        // --- MANEJO DE LA PESTAÑA 2: CONVERSOR MASIVO RÁPIDO ---
+        
+        // Núcleo de procesamiento del texto rápido
+        function processQuickText(rawText) {
+            if (!rawText) return;
+            const lines = rawText.split(/\r?\n/);
+            const targetFormat = document.getElementById('quickTargetFormat').value;
+            const typeAssumption = document.getElementById('quickTypeAssumption').value;
+
+            quickListData = [];
+
+            lines.forEach(line => {
+                const cleanLine = line.trim();
+                if (!cleanLine) return;
+
+                let parts = [];
+                if (cleanLine.includes('\t')) parts = cleanLine.split('\t');
+                else if (cleanLine.includes(';')) parts = cleanLine.split(';');
+                else if (cleanLine.includes(',')) {
+                    let testParts = cleanLine.split(',');
+                    if(testParts.length === 2 && !isNaN(parseCoord(testParts[0])) && !isNaN(parseCoord(testParts[1]))) {
+                        parts = testParts;
+                    } else { parts = [cleanLine]; }
+                } else {
+                    let testSpaces = cleanLine.split(/\s{2,}/); // Múltiples espacios
+                    if(testSpaces.length < 2) testSpaces = cleanLine.split(' ');
+                    if(testSpaces.length === 2 && !isNaN(parseCoord(testSpaces[0])) && !isNaN(parseCoord(testSpaces[1]))) {
+                        parts = testSpaces;
+                    } else { parts = [cleanLine]; }
+                }
+
+                let outputs = [];
+                parts.forEach((part, index) => {
+                    const cleanPart = part.trim();
+                    if (!cleanPart) return;
+
+                    const dd = parseCoord(cleanPart);
+                    let resultStr = "Inválido";
+
+                    if (!isNaN(dd)) {
+                        let isLat = true;
+                        if (typeAssumption === 'lat') isLat = true;
+                        else if (typeAssumption === 'lon') isLat = false;
+                        else {
+                            const up = cleanPart.toUpperCase();
+                            if (up.includes('E') || up.includes('W') || up.includes('O')) isLat = false;
+                            else if (up.includes('N') || up.includes('S')) isLat = true;
+                            else {
+                                if (parts.length === 2) {
+                                    isLat = (index === 0); // Estándar: Primero Latitud, luego Longitud
+                                } else {
+                                    isLat = Math.abs(dd) <= 90; // Suposición básica por rango numérico
+                                }
+                            }
+                        }
+                        resultStr = formatCoord(dd, isLat, targetFormat);
+                    }
+                    outputs.push({ original: cleanPart, result: resultStr });
+                });
+
+                quickListData.push({ lineRaw: cleanLine, items: outputs });
+            });
+
+            renderQuickTable();
+        }
+
+        // Carga de archivos exclusiva de la Pestaña 2 (Excel, CSV, TXT)
+        document.getElementById('quickFileInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            document.getElementById('fileInfo').classList.remove('hidden');
-            document.getElementById('fileInfo').classList.add('flex');
+            const fileInfo = document.getElementById('quickFileInfo');
+            const display = document.getElementById('quickFileNameDisplay');
+            fileInfo.className = "flex text-[10px] bg-green-50 text-green-700 p-2 rounded border border-green-100 items-center gap-2";
+            display.innerText = file.name;
+            
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            if (ext === 'txt' || ext === 'csv') {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    document.getElementById('quickListInput').value = evt.target.result;
+                    processQuickText(evt.target.result);
+                };
+                reader.readAsText(file);
+            } else if (ext === 'xlsx' || ext === 'xls') {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const wb = XLSX.read(evt.target.result, { type: 'binary' });
+                    const ws = wb.Sheets[wb.SheetNames[0]];
+                    // Extrae las filas puras como arreglos
+                    const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+                    // Transforma cada fila uniendo sus columnas con tabuladores
+                    const textLines = data.map(row => row.join('\t')).join('\n');
+                    
+                    document.getElementById('quickListInput').value = textLines;
+                    processQuickText(textLines);
+                };
+                reader.readAsBinaryString(file);
+            } else {
+                alert("Formato no soportado en este conversor. Use archivos .XLSX, .CSV o .TXT");
+            }
+        });
+
+        // Botón manual de procesar texto
+        document.getElementById('quickProcessBtn').addEventListener('click', () => {
+            const rawText = document.getElementById('quickListInput').value.trim();
+            if (!rawText) { alert("Por favor, ingresa o carga coordenadas en el cuadro de texto."); return; }
+            processQuickText(rawText);
+        });
+
+        function renderQuickTable() {
+            const tbody = document.getElementById('quickListTableBody');
+            tbody.innerHTML = '';
+
+            quickListData.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b";
+
+                let resultsHTML = "";
+                row.items.forEach(it => {
+                    resultsHTML += `<div class="font-mono bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-bold inline-block m-0.5 border border-indigo-100">${it.result}</div> `;
+                });
+
+                tr.innerHTML = `
+                    <td class="p-3 border text-center text-slate-400 font-bold bg-slate-50">${idx + 1}</td>
+                    <td class="p-3 border text-slate-600 truncate max-w-[200px]" title="${row.lineRaw}">${row.lineRaw}</td>
+                    <td class="p-3 border">${resultsHTML}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Copiar Resultados de la Pestaña 2
+        document.getElementById('quickCopyBtn').addEventListener('click', () => {
+            if (quickListData.length === 0) { alert("No hay datos para copiar."); return; }
+            let linesToCopy = quickListData.map(row => row.items.map(it => it.result).join('\t'));
+            navigator.clipboard.writeText(linesToCopy.join('\n'));
+            alert("¡Copiado! Los datos se han guardado en columnas listos para pegar en Excel.");
+        });
+
+        // Guardar Resultados de la Pestaña 2 a Excel
+        document.getElementById('quickExcelBtn').addEventListener('click', () => {
+            if (quickListData.length === 0) { alert("No hay datos para guardar."); return; }
+            let rowsExcel = quickListData.map((row, idx) => {
+                let obj = { "#": idx + 1, "Entrada Original": row.lineRaw };
+                row.items.forEach((it, i) => { obj[`Resultado Componente ${i+1}`] = it.result; });
+                return obj;
+            });
+            const ws = XLSX.utils.json_to_sheet(rowsExcel);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Conversión Rápida");
+            XLSX.writeFile(wb, "conversion_masiva_rapida.xlsx");
+        });
+
+
+        // --- MANEJO DE LA PESTAÑA 1: PROCESADOR Y TABLA MAPEO ---
+        
+        // Cargar desde cuadro de texto principal
+        document.getElementById('loadTextBtn').addEventListener('click', () => {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) { alert("Por favor, introduce datos válidos."); return; }
+            
+            const lines = text.split(/\r?\n/);
+            if (lines.length > 0) {
+                let sep = '\t';
+                if (lines[0].includes(';')) sep = ';';
+                else if (lines[0].includes(',')) sep = ',';
+
+                const headers = lines[0].split(sep).map(h => h.trim().replace(/^"|"$/g, ''));
+                let rawData = [];
+                for(let i = 1; i < lines.length; i++) {
+                    if(!lines[i].trim()) continue;
+                    const vals = lines[i].split(sep);
+                    let obj = {};
+                    headers.forEach((h, j) => { obj[h] = vals[j] ? vals[j].trim().replace(/^"|"$/g, '') : ""; });
+                    rawData.push(obj);
+                }
+                document.getElementById('fileInfo').classList.remove('hidden');
+                document.getElementById('fileInfo').classList.add('flex');
+                document.getElementById('fileNameDisplay').innerText = "Bloque de texto manual";
+                initData(rawData);
+            }
+        });
+
+        // Cargar Archivo (Excel, KMZ, KML, TXT)
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('fileInfo').className = "flex text-[10px] bg-green-50 text-green-700 p-2 rounded border border-green-100 items-center gap-2";
             document.getElementById('fileNameDisplay').innerText = file.name;
             const ext = file.name.split('.').pop().toLowerCase();
 
@@ -242,41 +591,25 @@
                     const zipData = await zip.loadAsync(file);
                     let kmlContent = "";
                     for (let filename in zipData.files) {
-                        if (filename.toLowerCase().endsWith('.kml')) {
-                            kmlContent = await zipData.files[filename].async("text");
-                            break;
-                        }
+                        if (filename.toLowerCase().endsWith('.kml')) { kmlContent = await zipData.files[filename].async("text"); break; }
                     }
                     if (kmlContent) processKML(kmlContent);
-                    else alert("No se encontró KML válido en el KMZ.");
-                } catch(err) { alert("Error al leer el KMZ."); }
+                    else alert("KMZ inválido.");
+                } catch(err) { alert("Error al leer KMZ."); }
             } else if (ext === 'kml') {
-                const reader = new FileReader();
-                reader.onload = (evt) => processKML(evt.target.result);
-                reader.readAsText(file);
+                const reader = new FileReader(); reader.onload = (evt) => processKML(evt.target.result); reader.readAsText(file);
             } else if (ext === 'txt' || ext === 'csv') {
                 const reader = new FileReader();
                 reader.onload = (evt) => {
-                    const text = evt.target.result;
-                    const lines = text.split(/\r?\n/);
-                    if (lines.length > 0) {
-                        const firstLine = lines[0];
-                        let sep = '\t';
-                        if (firstLine.includes(';')) sep = ';';
-                        else if (firstLine.includes(',')) sep = ',';
-                        else if (firstLine.includes('|')) sep = '|';
-
-                        const headers = firstLine.split(sep).map(h => h.trim().replace(/^"|"$/g, ''));
+                    const lines = evt.target.result.split(/\r?\n/);
+                    if(lines.length > 0) {
+                        let sep = lines[0].includes(';') ? ';' : (lines[0].includes(',') ? ',' : '\t');
+                        const headers = lines[0].split(sep).map(h => h.trim());
                         let rawData = [];
-                        
-                        for(let i = 1; i < lines.length; i++) {
+                        for(let i=1; i<lines.length; i++) {
                             if(!lines[i].trim()) continue;
-                            const vals = lines[i].split(sep);
-                            let obj = {};
-                            headers.forEach((h, j) => {
-                                let v = vals[j] ? vals[j].trim().replace(/^"|"$/g, '') : "";
-                                obj[h] = v;
-                            });
+                            let vals = lines[i].split(sep); let obj = {};
+                            headers.forEach((h, j) => { obj[h] = vals[j] ? vals[j].trim() : ""; });
                             rawData.push(obj);
                         }
                         initData(rawData);
@@ -286,47 +619,27 @@
             } else if (ext === 'xlsx' || ext === 'xls') {
                 const reader = new FileReader();
                 reader.onload = (evt) => {
-                    const wb = XLSX.read(evt.target.result, { type: 'binary', cellNF: true, cellText: true });
+                    const wb = XLSX.read(evt.target.result, { type: 'binary' });
                     const ws = wb.Sheets[wb.SheetNames[0]];
-                    const rawData = XLSX.utils.sheet_to_json(ws, { raw: false, defval: "" });
-                    initData(rawData);
+                    initData(XLSX.utils.sheet_to_json(ws, { defval: "" }));
                 };
                 reader.readAsBinaryString(file);
             }
         });
 
         function processKML(xmlString) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(xmlString, "text/xml");
-            const placemarks = doc.querySelectorAll("Placemark");
-            let data = [];
-            
+            const parser = new DOMParser(); const doc = parser.parseFromString(xmlString, "text/xml");
+            const placemarks = doc.querySelectorAll("Placemark"); let data = [];
             placemarks.forEach(p => {
-                let row = {};
-                let name = p.querySelector("name");
-                row["Nombre"] = name ? name.textContent : "";
-                
+                let row = {}; let name = p.querySelector("name"); row["Nombre"] = name ? name.textContent : "";
                 let coords = p.querySelector("Point coordinates");
-                if (coords) {
-                    let parts = coords.textContent.trim().split(",");
-                    row["Longitud"] = parts[0] || "";
-                    row["Latitud"] = parts[1] || "";
-                }
-
+                if (coords) { let parts = coords.textContent.trim().split(","); row["Longitud"] = parts[0] || ""; row["Latitud"] = parts[1] || ""; }
                 let desc = p.querySelector("description");
                 if (desc) {
-                    let d = document.createElement("div");
-                    d.innerHTML = desc.textContent;
-                    let rows = d.querySelectorAll("tr");
-                    rows.forEach(tr => {
+                    let d = document.createElement("div"); d.innerHTML = desc.textContent;
+                    d.querySelectorAll("tr").forEach(tr => {
                         let tds = tr.querySelectorAll("td");
-                        if (tds.length >= 2) {
-                            let key = tds[0].textContent.trim().replace(/:$/, '');
-                            let val = tds[1].textContent.trim();
-                            if (!["LATITUD", "LONGITUD"].includes(key.toUpperCase())) {
-                                row[key] = val;
-                            }
-                        }
+                        if (tds.length >= 2) { row[tds[0].textContent.trim().replace(/:$/, '')] = tds[1].textContent.trim(); }
                     });
                 }
                 data.push(row);
@@ -335,13 +648,9 @@
         }
 
         function initData(data) {
-            currentData = data;
-            if (!currentData || currentData.length === 0) {
-                alert("El archivo parece estar vacío o no pudo leerse.");
-                return;
-            }
-            columns = Object.keys(currentData[0] || {});
-            document.getElementById('rowCount').innerText = `${currentData.length} puntos detectados`;
+            currentData = data; if (!currentData.length) return;
+            columns = Object.keys(currentData[0]);
+            document.getElementById('rowCount').innerText = `${currentData.length} puntos en tabla`;
             
             mappings = { nombre: 'ENUMERACIÓN', punto: 'NINGUNO', descripcion: 'NINGUNO', latitud: '', longitud: '' };
             columns.forEach(col => {
@@ -351,201 +660,119 @@
                 if (c.includes('nombre') || c.includes('name')) mappings.nombre = col;
             });
 
-            document.getElementById('previewCard').classList.remove('opacity-50', 'grayscale', 'pointer-events-none');
+            document.getElementById('previewCard').className = "bg-white p-4 md:p-5 rounded-xl shadow-sm border border-slate-200 transition-all";
             document.getElementById('mappingPanel').classList.remove('hidden');
             document.getElementById('dataGridPanel').classList.remove('hidden');
-
             renderSelectors(); renderTable(); updatePreview();
         }
 
         function renderSelectors() {
-            const container = document.getElementById('selectorsContainer');
-            container.innerHTML = '';
-            createFieldConfig('nombre', 'Cabecera (Título)', true);
-            createFieldConfig('punto', 'Dato Secundario', true);
-            createFieldConfig('latitud', 'Latitud', false);
-            createFieldConfig('longitud', 'Longitud', false);
-            createFieldConfig('descripcion', 'Descripción', true);
-
-            Object.keys(mappings).forEach(key => {
-                if (key.startsWith('custom_')) createFieldConfig(key, fieldLabels[key], true, true);
-            });
-        }
-
-        function createFieldConfig(id, defaultLabel, includeExtras, isRemovable = false) {
-            const container = document.createElement('div');
-            container.className = "p-3 bg-slate-50 border rounded-xl space-y-2 hover:bg-indigo-50/30 transition-colors";
-            
-            const headerRow = document.createElement('div');
-            headerRow.className = "flex justify-between items-center";
-            headerRow.innerHTML = `<span class="text-[9px] font-bold text-indigo-400 uppercase tracking-wider">${id.includes('custom') ? 'Personalizado' : 'Campo KMZ'}</span>`;
-            if (isRemovable) {
-                const del = document.createElement('button');
-                del.innerHTML = '<i data-lucide="trash-2" class="w-3 h-3 text-red-400"></i>';
-                del.onclick = () => { delete mappings[id]; delete fieldLabels[id]; renderSelectors(); updatePreview(); };
-                headerRow.appendChild(del);
-            }
-            container.appendChild(headerRow);
-
-            const input = document.createElement('input');
-            input.value = fieldLabels[id] || ""; input.className = "w-full text-xs p-2 border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-400 font-bold bg-white";
-            input.oninput = (e) => { fieldLabels[id] = e.target.value; updatePreview(); };
-            
-            const select = document.createElement('select');
-            select.className = "w-full text-[11px] p-2 border border-slate-200 rounded-lg bg-white cursor-pointer outline-none focus:border-indigo-400";
-            const opts = [...columns];
-            if (includeExtras) opts.unshift('ENUMERACIÓN', 'NINGUNO'); else opts.unshift('-- Seleccionar Columna --');
-            opts.forEach(o => {
-                const opt = document.createElement('option'); opt.value = o; opt.text = o;
-                if (mappings[id] === o) opt.selected = true;
-                select.appendChild(opt);
-            });
-            select.onchange = (e) => { mappings[id] = e.target.value; updatePreview(); };
-
-            container.appendChild(input); container.appendChild(select);
-            document.getElementById('selectorsContainer').appendChild(container);
-            lucide.createIcons();
+            const container = document.getElementById('selectorsContainer'); container.innerHTML = '';
+            const addSel = (id, lbl, ext, rem=false) => {
+                const div = document.createElement('div'); div.className = "p-3 bg-slate-50 border rounded-xl space-y-1";
+                div.innerHTML = `<div class="flex justify-between items-center"><span class="text-[9px] font-bold text-indigo-400 uppercase">${id.includes('custom')?'Extra':'Campo KML'}</span></div>`;
+                if(rem) {
+                    let btn = document.createElement('button'); btn.innerHTML = "×"; btn.className="text-red-500 font-bold float-right text-xs";
+                    btn.onclick=()=>{ delete mappings[id]; delete fieldLabels[id]; renderSelectors(); updatePreview(); };
+                    div.firstChild.appendChild(btn);
+                }
+                let inp = document.createElement('input'); inp.value = fieldLabels[id]||""; inp.className="w-full text-xs p-1 border rounded font-bold mb-1";
+                inp.oninput=(e)=>{ fieldLabels[id]=e.target.value; updatePreview(); };
+                let sel = document.createElement('select'); sel.className="w-full text-[11px] p-1 border rounded bg-white";
+                let opts = [...columns]; if(ext) opts.unshift('ENUMERACIÓN', 'NINGUNO'); else opts.unshift('-- Seleccionar --');
+                opts.forEach(o => { let op = document.createElement('option'); op.value=o; op.text=o; if(mappings[id]===o) op.selected=true; sel.appendChild(op); });
+                sel.onchange=(e)=>{ mappings[id]=e.target.value; updatePreview(); };
+                div.appendChild(inp); div.appendChild(sel); container.appendChild(div);
+            };
+            addSel('nombre', 'Cabecera (Título)', true); addSel('punto', 'ID Punto', true); addSel('latitud', 'Latitud', false); addSel('longitud', 'Longitud', false); addSel('descripcion', 'Descripción', true);
+            Object.keys(mappings).forEach(k => { if(k.startsWith('custom_')) addSel(k, fieldLabels[k], true, true); });
         }
 
         function updatePreview() {
-            if (!currentData || currentData.length === 0) return;
-            const row = currentData[0];
-            let title = "";
-            if (mappings.nombre === 'ENUMERACIÓN') title = `${fieldLabels.nombre} 1`;
-            else if (mappings.nombre === 'NINGUNO') title = "Sin Título";
-            else title = row[mappings.nombre] || "---";
-            document.getElementById('previewHeader').innerText = title;
-
+            if (!currentData.length) return; const row = currentData[0];
+            document.getElementById('previewHeader').innerText = mappings.nombre==='ENUMERACIÓN' ? `${fieldLabels.nombre} 1` : (mappings.nombre==='NINGUNO' ? "Sin Título" : row[mappings.nombre] || "---");
             let html = "";
-            const addRow = (id) => {
-                const col = mappings[id];
-                if (!col || col === 'NINGUNO' || col.includes('--')) return;
-                const label = fieldLabels[id] || id;
-                let val = (col === 'ENUMERACIÓN') ? "1" : (row[col] || "-");
-                if (id === 'latitud' || id === 'longitud') {
-                    const p = parseCoord(row[col]);
-                    val = isNaN(p) ? `<span class="text-red-500 font-bold">${row[col]}</span>` : p.toFixed(6);
-                }
-                html += `<tr class="border-b border-slate-50 last:border-0"><td class="py-3 pr-4 font-bold text-slate-400 text-[10px] uppercase align-top">${label}</td><td class="py-3 text-slate-700">${val}</td></tr>`;
+            const buildR = (id) => {
+                let col = mappings[id]; if(!col || col==='NINGUNO' || col.includes('--')) return;
+                let val = col==='ENUMERACIÓN'?'1':(row[col]||'-');
+                if(id==='latitud'||id==='longitud') { let p = parseCoord(row[col]); val = isNaN(p)?row[col]:p.toFixed(6); }
+                html += `<tr class="border-b"><td class="py-1.5 font-bold text-slate-400 text-[10px] uppercase">${fieldLabels[id]}</td><td class="py-1.5 text-slate-700 font-mono">${val}</td></tr>`;
             };
-
-            addRow('punto'); addRow('latitud'); addRow('longitud'); addRow('descripcion');
-            Object.keys(mappings).forEach(k => { if (k.startsWith('custom_')) addRow(k); });
-            document.getElementById('previewTable').innerHTML = html || "<tr><td class='text-center py-8 text-slate-300 italic'>Sin datos</td></tr>";
+            buildR('punto'); buildR('latitud'); buildR('longitud'); buildR('descripcion');
+            Object.keys(mappings).forEach(k => { if(k.startsWith('custom_')) buildR(k); });
+            document.getElementById('previewTable').innerHTML = html;
         }
 
         function renderTable() {
-            document.getElementById('tableHeader').innerHTML = `<th class="p-3 border">#</th>` + columns.map(c => `<th class="p-3 border whitespace-nowrap min-w-[120px]">${c}</th>`).join('');
+            document.getElementById('tableHeader').innerHTML = `<th class="p-2 border">#</th>` + columns.map(c => `<th class="p-2 border whitespace-nowrap">${c}</th>`).join('');
             const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
             currentData.forEach((row, idx) => {
-                const tr = document.createElement('tr'); tr.className = "hover:bg-indigo-50 transition-colors border-b";
-                let tds = `<td class="p-3 border bg-slate-50 font-bold text-center text-slate-400">${idx + 1}</td>`;
-                columns.forEach(c => { tds += `<td class="p-3 border focus:bg-white outline-none" contenteditable="true" data-row="${idx}" data-col="${c}">${row[c] || ''}</td>`; });
+                const tr = document.createElement('tr'); tr.className = "hover:bg-slate-100 border-b";
+                let tds = `<td class="p-2 border bg-slate-50 font-bold text-center text-slate-400">${idx + 1}</td>`;
+                columns.forEach(c => { tds += `<td class="p-2 border outline-none" contenteditable="true" data-row="${idx}" data-col="${c}">${row[c] || ''}</td>`; });
                 tr.innerHTML = tds; tbody.appendChild(tr);
             });
-
             tbody.addEventListener('input', (e) => {
-                const r = e.target.dataset.row; const c = e.target.dataset.col;
-                if (r !== undefined) { currentData[r][c] = e.target.innerText; if (r == 0) updatePreview(); }
+                let r = e.target.dataset.row; let c = e.target.dataset.col;
+                if(r!==undefined) { currentData[r][c] = e.target.innerText; if(r==0) updatePreview(); }
             });
         }
 
+        // Conversor Aplicado a Columnas de la Tabla Base
         document.getElementById('convertCoordsBtn').addEventListener('click', () => {
             const latCol = mappings.latitud; const lonCol = mappings.longitud;
-            if (!latCol || !lonCol || latCol.includes('--') || lonCol.includes('--')) {
-                alert("Mapea las columnas Latitud y Longitud para usar el conversor."); return;
-            }
+            if (!latCol || !lonCol || latCol.includes('--') || lonCol.includes('--')) { alert("Asigna Latitud y Longitud primero."); return; }
             const tgt = document.getElementById('targetFormat').value;
             currentData.forEach(row => {
-                const latDD = parseCoord(row[latCol]); const lonDD = parseCoord(row[lonCol]);
-                if (!isNaN(latDD)) row[latCol] = formatCoord(latDD, true, tgt);
-                if (!isNaN(lonDD)) row[lonCol] = formatCoord(lonDD, false, tgt);
+                let lat = parseCoord(row[latCol]); let lon = parseCoord(row[lonCol]);
+                if(!isNaN(lat)) row[latCol] = formatCoord(lat, true, tgt); if(!isNaN(lon)) row[lonCol] = formatCoord(lon, false, tgt);
             });
             renderTable(); updatePreview();
         });
 
+        // Campos personalizados en Modal
         const modal = document.getElementById('customFieldModal');
+        function closeModal() { modal.classList.add('hidden'); document.getElementById('newFieldName').value=""; }
         document.getElementById('addCustomField').onclick = () => { modal.classList.remove('hidden'); document.getElementById('newFieldName').focus(); };
-        function closeModal() { modal.classList.add('hidden'); document.getElementById('newFieldName').value = ""; }
         document.getElementById('confirmCustomField').onclick = () => {
-            const name = document.getElementById('newFieldName').value.trim();
-            if (name) { const id = 'custom_' + Date.now(); mappings[id] = 'NINGUNO'; fieldLabels[id] = name; renderSelectors(); updatePreview(); closeModal(); }
+            let name = document.getElementById('newFieldName').value.trim();
+            if(name) { let id = 'custom_'+Date.now(); mappings[id]='NINGUNO'; fieldLabels[id]=name; renderSelectors(); updatePreview(); closeModal(); }
         };
 
-        // --- EXPORTAR KMZ ---
+        // Exportaciones de Pestaña 1
         document.getElementById('exportKmzBtn').onclick = async () => {
-            if (!currentData || currentData.length === 0) return;
-            const latCol = mappings.latitud; const lonCol = mappings.longitud;
-            if (!latCol || !lonCol || latCol.includes('--') || lonCol.includes('--')) { alert("Asigna columnas Latitud y Longitud"); return; }
-
-            const zip = new JSZip();
-            let kml = `<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>`;
-            
+            if(!currentData.length) return; const latCol = mappings.latitud; const lonCol = mappings.longitud;
+            if(!latCol || !lonCol || latCol.includes('--')) { alert("Mapee Lat y Lon"); return; }
+            const zip = new JSZip(); let kml = `<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>`;
             currentData.forEach((row, i) => {
-                const lat = parseCoord(row[latCol]); const lon = parseCoord(row[lonCol]);
-                if (isNaN(lat) || isNaN(lon)) return;
-                
-                let name = mappings.nombre === 'ENUMERACIÓN' ? `${fieldLabels.nombre} ${i+1}` : (mappings.nombre === 'NINGUNO' ? "" : row[mappings.nombre] || "");
+                let lat = parseCoord(row[latCol]); let lon = parseCoord(row[lonCol]); if(isNaN(lat)||isNaN(lon)) return;
+                let name = mappings.nombre==='ENUMERACIÓN'?`${fieldLabels.nombre} ${i+1}`:(mappings.nombre==='NINGUNO'?"":row[mappings.nombre]||"");
                 let info = "";
-                const buildRow = (id) => {
-                    const col = mappings[id]; if (!col || col === 'NINGUNO' || col.includes('--')) return;
-                    let val = (col === 'ENUMERACIÓN') ? (i + 1) : (row[col] || "");
-                    info += `<tr><td style="color:#888;padding-right:12px;padding-bottom:5px;"><b>${fieldLabels[id].toUpperCase()}</b></td><td style="padding-bottom:5px;">${val}</td></tr>`;
+                const bR = (id) => {
+                    let col = mappings[id]; if(!col || col==='NINGUNO'||col.includes('--')) return;
+                    info += `<tr><td style="color:#777;padding-right:10px;"><b>${fieldLabels[id]}</b></td><td>${col==='ENUMERACIÓN'?i+1:row[col]}</td></tr>`;
                 };
-
-                buildRow('punto');
-                info += `<tr><td style="color:#888;padding-right:12px;padding-bottom:5px;"><b>${fieldLabels.latitud.toUpperCase()}</b></td><td style="padding-bottom:5px;">${row[latCol]}</td></tr>`;
-                info += `<tr><td style="color:#888;padding-right:12px;padding-bottom:5px;"><b>${fieldLabels.longitud.toUpperCase()}</b></td><td style="padding-bottom:5px;">${row[lonCol]}</td></tr>`;
-                buildRow('descripcion');
-                Object.keys(mappings).forEach(k => { if (k.startsWith('custom_')) buildRow(k); });
-
-                kml += `<Placemark><name>${name}</name><description><![CDATA[<div style="font-family:Sans-serif;padding:5px;"><table style="font-size:12px;border-collapse:collapse;">${info}</table></div>]]></description><Point><coordinates>${lon},${lat},0</coordinates></Point></Placemark>`;
+                bR('punto'); info+=`<tr><td style="color:#777;padding-right:10px;"><b>LATITUD</b></td><td>${row[latCol]}</td></tr><tr><td style="color:#777;padding-right:10px;"><b>LONGITUD</b></td><td>${row[lonCol]}</td></tr>`;
+                bR('descripcion'); Object.keys(mappings).forEach(k=>{ if(k.startsWith('custom_')) bR(k); });
+                kml += `<Placemark><name>${name}</name><description><![CDATA[<table style="font-family:sans-serif;font-size:11px;">${info}</table>]]></description><Point><coordinates>${lon},${lat},0</coordinates></Point></Placemark>`;
             });
-
-            kml += `</Document></kml>`;
-            zip.file("doc.kml", kml);
-            const blob = await zip.generateAsync({ type: "blob" });
-            downloadFile(blob, (document.getElementById('exportName').value || "datos_exportados") + ".kmz");
+            kml += `</Document></kml>`; zip.file("doc.kml", kml);
+            let b = await zip.generateAsync({type:"blob"}); download(b, (document.getElementById('exportName').value||"export") + ".kmz");
         };
 
-        // --- EXPORTAR EXCEL ---
         document.getElementById('exportExcelBtn').onclick = () => {
-            if (!currentData || currentData.length === 0) return;
-            const ws = XLSX.utils.json_to_sheet(currentData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Datos");
-            XLSX.writeFile(wb, (document.getElementById('exportName').value || "datos_exportados") + ".xlsx");
+            if(!currentData.length) return;
+            let ws = XLSX.utils.json_to_sheet(currentData); let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Datos"); XLSX.writeFile(wb, (document.getElementById('exportName').value||"export")+".xlsx");
         };
 
-        // --- EXPORTAR TXT / CSV ---
         document.getElementById('exportTxtBtn').onclick = () => {
-            if (!currentData || currentData.length === 0) return;
-            
-            const sep = document.getElementById('txtSeparator').value || ";";
-            let txt = columns.map(c => c.toUpperCase()).join(sep) + "\n";
-            
-            currentData.forEach(row => { 
-                const rowStr = columns.map(c => {
-                    let val = row[c] !== undefined && row[c] !== null ? String(row[c]) : "";
-                    if(val.includes(sep) || val.includes('\n') || val.includes('"')) {
-                        val = `"${val.replace(/"/g, '""')}"`;
-                    }
-                    return val;
-                }).join(sep);
-                txt += rowStr + "\n"; 
-            });
-
-            const ext = sep === ',' ? ".csv" : ".txt";
-            const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
-            downloadFile(blob, (document.getElementById('exportName').value || "datos_exportados") + ext);
+            if(!currentData.length) return; let sep = document.getElementById('txtSeparator').value||";";
+            let txt = columns.join(sep)+"\n" + currentData.map(r => columns.map(c => String(r[c]||'').replace(new RegExp(sep, 'g'), ' ')).join(sep)).join('\n');
+            download(new Blob([txt], {type:"text/plain"}), (document.getElementById('exportName').value||"export")+ (sep===','?'.csv':'.txt'));
         };
 
-        function downloadFile(blob, filename) {
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-        }
+        function download(blob, name) { let a = document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click(); }
     </script>
 </body>
 </html>
